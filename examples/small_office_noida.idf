@@ -1,0 +1,105 @@
+!- Example envelope: a single-zone 20 m x 10 m x 3.5 m office in Noida (composite climate).
+!- Hand-written in the same object syntax DesignBuilder uses for its EnergyPlus export
+!- (File > Export > Export EnergyPlus IDF file). Only the objects the envelope check reads
+!- are included, so this file is not a complete simulation input.
+
+Version, 9.4;
+
+Building,
+    Small office Noida,      !- Name
+    0,                       !- North Axis {deg}
+    City,                    !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value
+    0.4,                     !- Temperature Convergence Tolerance Value {deltaC}
+    FullExterior,            !- Solar Distribution
+    25,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+Site:Location,
+    Noida,                   !- Name
+    28.57,                   !- Latitude {deg}
+    77.32,                   !- Longitude {deg}
+    5.5,                     !- Time Zone {hr}
+    200;                     !- Elevation {m}
+
+GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    Counterclockwise,        !- Vertex Entry Direction
+    Relative;                !- Coordinate System
+
+Zone,
+    Office,                  !- Name
+    0,                       !- Direction of Relative North {deg}
+    0, 0, 0,                 !- X, Y, Z Origin {m}
+    1,                       !- Type
+    1;                       !- Multiplier
+
+!- ===== Materials (thickness m, conductivity W/m-K, density kg/m3, specific heat J/kg-K)
+Material, Cement plaster 12mm, Rough, 0.012, 0.72, 1860, 840, 0.9, 0.6, 0.6;
+Material, XPS 75mm, MediumRough, 0.075, 0.034, 35, 1400, 0.9, 0.6, 0.6;
+Material, Burnt clay brick 230mm, Rough, 0.23, 0.81, 1820, 880, 0.9, 0.7, 0.7;
+Material, Cement screed 50mm, Rough, 0.05, 0.72, 1860, 840, 0.9, 0.6, 0.6;
+Material, PUF 50mm, MediumRough, 0.05, 0.023, 30, 1400, 0.9, 0.6, 0.6;
+Material, RCC slab 150mm, MediumRough, 0.15, 1.58, 2288, 880, 0.9, 0.65, 0.65;
+
+WindowMaterial:SimpleGlazingSystem,
+    DGU low-e,               !- Name
+    2.0,                     !- U-Factor {W/m2-K}
+    0.28,                    !- Solar Heat Gain Coefficient
+    0.45;                    !- Visible Transmittance
+
+!- ===== Constructions (outside layer first)
+Construction, Ext wall - brick + 75mm XPS, Cement plaster 12mm, XPS 75mm, Burnt clay brick 230mm, Cement plaster 12mm;
+Construction, Flat roof - RCC + 50mm PUF, Cement screed 50mm, PUF 50mm, RCC slab 150mm, Cement plaster 12mm;
+Construction, Ground floor slab, RCC slab 150mm;
+Construction, DGU low-e window, DGU low-e;
+
+!- ===== Opaque surfaces
+BuildingSurface:Detailed,
+    South wall, Wall, Ext wall - brick + 75mm XPS, Office, Outdoors, , SunExposed, WindExposed, autocalculate, 4,
+    0, 0, 3.5,   0, 0, 0,   20, 0, 0,   20, 0, 3.5;
+
+BuildingSurface:Detailed,
+    East wall, Wall, Ext wall - brick + 75mm XPS, Office, Outdoors, , SunExposed, WindExposed, autocalculate, 4,
+    20, 0, 3.5,   20, 0, 0,   20, 10, 0,   20, 10, 3.5;
+
+BuildingSurface:Detailed,
+    North wall, Wall, Ext wall - brick + 75mm XPS, Office, Outdoors, , SunExposed, WindExposed, autocalculate, 4,
+    20, 10, 3.5,   20, 10, 0,   0, 10, 0,   0, 10, 3.5;
+
+BuildingSurface:Detailed,
+    West wall, Wall, Ext wall - brick + 75mm XPS, Office, Outdoors, , SunExposed, WindExposed, autocalculate, 4,
+    0, 10, 3.5,   0, 10, 0,   0, 0, 0,   0, 0, 3.5;
+
+BuildingSurface:Detailed,
+    Roof, Roof, Flat roof - RCC + 50mm PUF, Office, Outdoors, , SunExposed, WindExposed, autocalculate, 4,
+    0, 10, 3.5,   0, 0, 3.5,   20, 0, 3.5,   20, 10, 3.5;
+
+BuildingSurface:Detailed,
+    Ground floor, Floor, Ground floor slab, Office, Ground, , NoSun, NoWind, autocalculate, 4,
+    20, 10, 0,   20, 0, 0,   0, 0, 0,   0, 10, 0;
+
+!- ===== Windows (4.0 x 1.8 m on the long facades, 3.0 x 1.8 m on the short ones, sill 0.9 m)
+FenestrationSurface:Detailed,
+    South window 1, Window, DGU low-e window, South wall, , autocalculate, , 1, 4,
+    2, 0, 2.7,   2, 0, 0.9,   6, 0, 0.9,   6, 0, 2.7;
+
+FenestrationSurface:Detailed,
+    South window 2, Window, DGU low-e window, South wall, , autocalculate, , 1, 4,
+    12, 0, 2.7,   12, 0, 0.9,   16, 0, 0.9,   16, 0, 2.7;
+
+FenestrationSurface:Detailed,
+    North window 1, Window, DGU low-e window, North wall, , autocalculate, , 1, 4,
+    18, 10, 2.7,   18, 10, 0.9,   14, 10, 0.9,   14, 10, 2.7;
+
+FenestrationSurface:Detailed,
+    North window 2, Window, DGU low-e window, North wall, , autocalculate, , 1, 4,
+    8, 10, 2.7,   8, 10, 0.9,   4, 10, 0.9,   4, 10, 2.7;
+
+FenestrationSurface:Detailed,
+    East window, Window, DGU low-e window, East wall, , autocalculate, , 1, 4,
+    20, 3.5, 2.7,   20, 3.5, 0.9,   20, 6.5, 0.9,   20, 6.5, 2.7;
+
+FenestrationSurface:Detailed,
+    West window, Window, DGU low-e window, West wall, , autocalculate, , 1, 4,
+    0, 6.5, 2.7,   0, 6.5, 0.9,   0, 3.5, 0.9,   0, 3.5, 2.7;
